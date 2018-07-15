@@ -1,0 +1,50 @@
+{
+  "name": "project5",
+  "version": "0.1.0",
+  "description": "5조 크라우드펀딩",
+  "main": "server/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "node $NODE_DEBUG_OPTION server/",
+    "dev": "bnr start",
+    "compile": "truffle compile"
+  },
+  "betterScripts": {
+    "start": {
+      "command": "npm start"
+    },
+    "test": {
+      "command": "npm run-script test:server"
+    },
+    "test:server": {
+      "command": "mocha -R spec 'server/**/*.spec.js'"
+    }
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "ejs": "~2.5.7",
+    "express": "^4.16.3",
+    "helmet": "^3.12.1",
+    "lodash": "^4.17.10",
+    "moment": "^2.22.2",
+    "morgan": "^1.9.0",
+    "openzeppelin-solidity": "^1.10.0",
+    "web3": "^1.0.0-beta.34"
+  },
+  "devDependencies": {
+    "eslint": "^3.13.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-mocha": "^4.8.0",
+    "ganache-cli": "^6.1.4",
+    "mocha": "^5.1.1",
+    "should": "^13.2.1",
+    "sinon": "^5.0.7"
+  },
+  "engines": {
+    "node": "8.9.x"
+  },
+  "private": true
+}
