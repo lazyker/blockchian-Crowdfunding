@@ -25,5 +25,5 @@ module.exports = {
   timezone: process.env.TZ || 'Asia/Seoul',
   ethNetwork: process.env.EHT_NETWORK,
 
-  addressMyToken: process.env.MYTOKEN,
+  addressMyToken: process.env.MY_ADDRESS,
 };

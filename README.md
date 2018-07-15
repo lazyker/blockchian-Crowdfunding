@@ -10,7 +10,7 @@ node.js 버전
 .env 생성
 NODE_ENV={환경} //development
 EHT_NETWORK={구동할 네트워크 환경}
-MYADDRESS={내주소}
+MY_ADDRESS={내주소}
 
 ```
 
