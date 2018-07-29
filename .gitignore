@@ -1,0 +1,10 @@
+# webstorm config
+.idea
+
+# dependency modules
+node_modules
+
+# local config
+.env
+
+build

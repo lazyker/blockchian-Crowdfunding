@@ -1,5 +1,5 @@
 {
-  "name": "project5",
+  "name": "blockchain-Crowdfunding",
   "version": "0.1.0",
   "description": "5조 크라우드펀딩",
   "main": "server/index.js",

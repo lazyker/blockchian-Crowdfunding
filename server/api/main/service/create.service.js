@@ -1,6 +1,6 @@
 'use strict';
 
-const { web3, medicalPatientDocumentContract: medicalDoc } = require('../../../web3');
+const { web3 } = require('../../../web3');
 
 
 /**
