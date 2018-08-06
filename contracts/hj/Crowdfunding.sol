@@ -98,7 +98,7 @@ contract Crowdfunding is Ownable {
     }
     
     /**
-    * @dev 토큰 구매의 유효성 검사
+    * @dev 토큰 구매 유효성 검사
     * @param _beneficiary 투자자 주소
     * @param _weiAmount 구매 wei값
     */
