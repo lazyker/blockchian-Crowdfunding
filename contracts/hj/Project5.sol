@@ -3,10 +3,8 @@ pragma solidity ^0.4.23;
 import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Crowdfunding.sol";
 
-contract Project5 is Ownable {
+contract Project5 is Ownable, CrowdfundingBase {
     
-    enum State { Ready, Active, Refunding, Closed }
-
     struct Campaign {
         address addr;
         address wallet;
@@ -21,7 +19,7 @@ contract Project5 is Ownable {
     }
 
     address[] public campaigns;
-    mapping (uint256 => Campaign) public campaignToMapping;
+    mapping (address => Campaign) public campaignToMapping;
 
     event NewCrowdfunding();
     
@@ -29,6 +27,15 @@ contract Project5 is Ownable {
         require(msg.sender != address(0));
     }
     
+    /**
+    * @dev 크라우드 펀딩을 등록합니다.
+    * @param _wallet 크라우드 펀딩 지갑 주소
+    * @param _name 토큰 이름
+    * @param _symbol 토큰 심볼
+    * @param _goal 목표 모금액
+    * @param _openingTime 시작시간
+    * @param _closingTIme 종료시간
+    */
     function newCrowdfunding (
         address _wallet, 
         string _name, 
@@ -66,15 +73,24 @@ contract Project5 is Ownable {
     }
     
     function _saveCrowdfunding(Campaign _campaign) internal {
-        uint256 id = campaigns.push(_campaign.addr) - 1;
-        campaignToMapping[id] = _campaign;
+        campaigns.push(_campaign.addr);
+        campaignToMapping[_campaign.addr] = _campaign;
     }
     
+    /**
+    * @dev 모든 크라우드 펀딩 목록을 반환합니다.
+    * @return address[]
+    */
     function getCrowdfundings() public view returns (address[]) {
         return campaigns;
     }
     
-    function getCrowdfunding(uint256 _id) public view returns (
+    /**
+    * @dev 크라우드 펀딩을 반환합니다.
+    * @param _crowdfunding 크라우드 펀딩 주소
+    * @return Campaign
+    */
+    function getCrowdfunding(address _crowdfunding) public view returns (
         address addr,
         address wallet,
         address token,
@@ -86,7 +102,7 @@ contract Project5 is Ownable {
         uint256 closingTIme
     ) 
     {
-        Campaign storage campaign = campaignToMapping[_id];
+        Campaign storage campaign = campaignToMapping[_crowdfunding];
         
         return(
             campaign.addr, 
@@ -101,8 +117,26 @@ contract Project5 is Ownable {
         );
     }
     
-    function finalizeCrowdfunding(address _crowdfunding) public onlyOwner {
-        require(_crowdfunding.call(bytes4(keccak256("finalize()"))));
+    /**
+    * @dev 크라우드 펀딩을 비상 중지시킵니다.
+    * @param _crowdfunding 크라우드 펀딩 주소
+    */
+    function emergenyPauseCrowdfunding(address _crowdfunding) public onlyOwner {
+        Campaign storage campaign = campaignToMapping[_crowdfunding];
+        campaign.state = State.Paused;
+        
+        require(_crowdfunding.call(bytes4(keccak256("emergencyPause()"))));
     }
     
+    /**
+    * @dev 크라우드 펀딩을 종료시킵니다.
+    * @param _crowdfunding 크라우드 펀딩 주소
+    */
+    function finalizeCrowdfunding(address _crowdfunding) public onlyOwner {
+        Campaign storage campaign = campaignToMapping[_crowdfunding];
+        campaign.state = State.Closed;
+        
+        require(_crowdfunding.call(bytes4(keccak256("finalize()"))));
+    }
+
 }
