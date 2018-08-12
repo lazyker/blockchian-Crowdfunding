@@ -1,12 +1,13 @@
 pragma solidity ^0.4.23;
 
+import "./CrowdfundingBase.sol";
 import "./CrowdfundingToken.sol";
 import "./RefundVault.sol";
 
 /**
  * @title Crowdfunding
  */
-contract Crowdfunding is Ownable {
+contract Crowdfunding is Ownable, CrowdfundingBase {
     using SafeMath for uint256;
     using SafeERC20 for ERC20;
     
@@ -30,6 +31,7 @@ contract Crowdfunding is Ownable {
     uint256 public closingTime;
 
     bool public isFinalized = false;
+    bool public isPaused = false;
 
     event TokenPurchase(
         address indexed purchaser,
@@ -38,20 +40,16 @@ contract Crowdfunding is Ownable {
         uint256 amount
     );
     event GoalReached(address vault, uint256 weiRaised);
+    event Pause();
+    event Unpause();
     event Finalized();
-
-    modifier onlyWhileOpen {
-        // solium-disable-next-line security/no-block-members
-        require(block.timestamp >= openingTime && block.timestamp <= closingTime, "It has not started yet.");
-        _;
-    }
 
     constructor(
         address _wallet, 
         string _name, 
         string _symbol, 
         uint256 _goal, 
-        uint256 _openingTime, 
+        uint256 _openingTime,
         uint256 _closingTime
     )
         public
@@ -62,6 +60,22 @@ contract Crowdfunding is Ownable {
         closingTime = _closingTime;
         token = new CrowdfundingToken(this, _name, _symbol);
         vault = new RefundVault(_wallet);
+    }
+    
+    modifier onlyWhileOpen {
+        // solium-disable-next-line security/no-block-members
+        require(block.timestamp >= openingTime && block.timestamp <= closingTime, "It has not started yet.");
+        _;
+    }
+
+    modifier whenNotPaused() {
+        require(!isPaused);
+        _;
+    }
+
+    modifier whenPaused() {
+        require(isPaused);
+        _;
     }
 
     function () external payable {
@@ -85,18 +99,11 @@ contract Crowdfunding is Ownable {
             tokens
         );
 
-        _checkGoalReached();
-        
         _forwardFunds();
+        
+        _checkGoalReached();
     }
-    
-    function _checkGoalReached() internal {
-        if (goalReached()) {
-            closingTime = now;
-            emit GoalReached(vault, weiRaised);
-        }
-    }
-    
+
     /**
     * @dev 토큰 구매 유효성 검사
     * @param _beneficiary 투자자 주소
@@ -113,6 +120,13 @@ contract Crowdfunding is Ownable {
         require(_beneficiary != address(0));
         require(_weiAmount != 0);
         require(weiRaised.add(_weiAmount) <= goal);
+    }
+    
+    function _checkGoalReached() internal returns(bool) {
+        if (goalReached()) {
+            closingTime = now;
+            emit GoalReached(vault, weiRaised);
+        }
     }
 
     function _processPurchase(
@@ -174,6 +188,13 @@ contract Crowdfunding is Ownable {
     */
     function goalReached() public view returns (bool) {
         return weiRaised >= goal;
+    }
+
+  
+    function emergencyPause() onlyOwner public whenNotPaused {
+        isPaused = true;
+        
+        emit Pause();
     }
 
     function finalize() onlyOwner public {
